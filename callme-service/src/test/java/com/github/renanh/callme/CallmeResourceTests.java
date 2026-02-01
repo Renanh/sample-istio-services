@@ -74,7 +74,6 @@ class CallmeResourceTests {
         @Test
         @DisplayName("Deve retornar ID de instancia unico")
         void shouldReturnUniqueInstanceId() {
-            when(serviceProperties.getVersion()).thenReturn("v1");
             CallmeService callmeService = new CallmeService(serviceProperties);
 
             String instanceId = callmeService.getInstanceId();
