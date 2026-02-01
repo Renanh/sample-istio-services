@@ -1,5 +1,5 @@
 # CRaC-enabled Dockerfile for callme-service
-FROM azul/zulu-openjdk:21-jdk-crac-latest AS builder
+FROM azul/zulu-openjdk:25-jdk-crac-latest AS builder
 
 WORKDIR /app
 
@@ -9,7 +9,7 @@ COPY target/*.jar app.jar
 # Extract layers for efficient caching
 RUN java -Djarmode=layertools -jar app.jar extract
 
-FROM azul/zulu-openjdk:21-jdk-crac-latest
+FROM azul/zulu-openjdk:25-jdk-crac-latest
 
 WORKDIR /app
 
