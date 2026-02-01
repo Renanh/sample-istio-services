@@ -50,7 +50,7 @@
 
         <!-- Apache Commons -->
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
-        <commons-lang3.version>3.17.0</commons-lang3.version>
+        <commons-lang3.version>3.20.0</commons-lang3.version>
 
         <!-- Plugin versions -->
         <!-- https://mvnrepository.com/artifact/com.google.cloud.tools/jib-maven-plugin -->
