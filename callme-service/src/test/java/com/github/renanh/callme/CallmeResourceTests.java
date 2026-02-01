@@ -1,8 +1,10 @@
 package com.github.renanh.callme;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -13,43 +15,64 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@DisplayName("Callme Resource")
 class CallmeResourceTests {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Test
-    void ping_shouldReturnOkWithServiceName() throws Exception {
-        mockMvc.perform(get("/callme/ping"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("callme-service")));
+    @Nested
+    @DisplayName("GET /callme/ping")
+    class PingEndpoint {
+
+        @Test
+        @DisplayName("Deve retornar 200 OK com nome do serviço")
+        void shouldReturnOkWithServiceName() throws Exception {
+            mockMvc.perform(get("/callme/ping"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("callme-service")));
+        }
     }
 
-    @Test
-    void pingWithRandomDelay_shouldReturnOk() throws Exception {
-        mockMvc.perform(get("/callme/ping-with-random-delay"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("callme-service")));
+    @Nested
+    @DisplayName("GET /callme/ping-with-random-delay")
+    class PingWithRandomDelayEndpoint {
+
+        @Test
+        @DisplayName("Deve retornar 200 OK mesmo com delay")
+        void shouldReturnOkWithDelay() throws Exception {
+            mockMvc.perform(get("/callme/ping-with-random-delay"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("callme-service")));
+        }
     }
 
-    @Test
-    void actuatorHealth_shouldReturnUp() throws Exception {
-        mockMvc.perform(get("/actuator/health"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("UP")));
-    }
+    @Nested
+    @DisplayName("Actuator Health Endpoints")
+    class ActuatorHealthEndpoints {
 
-    @Test
-    void actuatorHealthLiveness_shouldReturnUp() throws Exception {
-        mockMvc.perform(get("/actuator/health/liveness"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("UP")));
-    }
+        @Test
+        @DisplayName("GET /actuator/health deve retornar UP")
+        void healthShouldReturnUp() throws Exception {
+            mockMvc.perform(get("/actuator/health"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("UP")));
+        }
 
-    @Test
-    void actuatorHealthReadiness_shouldReturnUp() throws Exception {
-        mockMvc.perform(get("/actuator/health/readiness"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("UP")));
+        @Test
+        @DisplayName("GET /actuator/health/liveness deve retornar UP")
+        void livenessShouldReturnUp() throws Exception {
+            mockMvc.perform(get("/actuator/health/liveness"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("UP")));
+        }
+
+        @Test
+        @DisplayName("GET /actuator/health/readiness deve retornar UP")
+        void readinessShouldReturnUp() throws Exception {
+            mockMvc.perform(get("/actuator/health/readiness"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("UP")));
+        }
     }
 }

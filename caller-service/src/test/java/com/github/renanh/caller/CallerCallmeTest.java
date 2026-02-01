@@ -3,8 +3,9 @@ package com.github.renanh.caller;
 import io.specto.hoverfly.junit.core.Hoverfly;
 import io.specto.hoverfly.junit5.HoverflyExtension;
 import io.specto.hoverfly.junit5.api.HoverflyConfig;
-import io.specto.hoverfly.junit5.api.HoverflySimulate;
+import io.specto.hoverfly.junit5.api.HoverflyCore;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,10 +22,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(HoverflyExtension.class)
-@HoverflySimulate(config = @HoverflyConfig(proxyLocalHost = true))
+@HoverflyCore(config = @HoverflyConfig(proxyLocalHost = true))
 @TestPropertySource(properties = {
         "services.callme.url=http://callme-service:8080"
 })
+@DisplayName("Caller Service - Integração com Callme Service")
 class CallerCallmeTest {
 
     @LocalServerPort
@@ -40,6 +42,7 @@ class CallerCallmeTest {
     }
 
     @Test
+    @DisplayName("Deve chamar callme-service e retornar resposta concatenada")
     void shouldCallCallmeService(Hoverfly hoverfly) {
         hoverfly.simulate(dsl(
                 service("callme-service:8080")
@@ -58,6 +61,7 @@ class CallerCallmeTest {
     }
 
     @Test
+    @DisplayName("Deve chamar callme-service endpoint com erro aleatório")
     void shouldCallCallmeServiceWithRandomError(Hoverfly hoverfly) {
         hoverfly.simulate(dsl(
                 service("callme-service:8080")
@@ -75,6 +79,7 @@ class CallerCallmeTest {
     }
 
     @Test
+    @DisplayName("Deve chamar callme-service endpoint com delay aleatório")
     void shouldCallCallmeServiceWithRandomDelay(Hoverfly hoverfly) {
         hoverfly.simulate(dsl(
                 service("callme-service:8080")
