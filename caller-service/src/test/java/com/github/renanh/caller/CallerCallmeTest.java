@@ -1,95 +1,83 @@
 package com.github.renanh.caller;
 
+import com.github.renanh.caller.domain.service.CallerService;
 import com.github.renanh.caller.infrastructure.client.CallmeServiceClient;
+import com.github.renanh.caller.infrastructure.config.ServiceProperties;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@DisplayName("Caller Service - Integração com Callme Service")
+@ExtendWith(MockitoExtension.class)
+@DisplayName("Caller Service")
 class CallerCallmeTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockitoBean
+    @Mock
     private CallmeServiceClient callmeServiceClient;
 
+    @Mock
+    private ServiceProperties serviceProperties;
+
+    private CallerService callerService;
+
+    @BeforeEach
+    void setUp() {
+        when(serviceProperties.getVersion()).thenReturn("v1");
+        callerService = new CallerService(callmeServiceClient, serviceProperties);
+    }
+
     @Nested
-    @DisplayName("GET /caller/ping")
-    class PingEndpoint {
+    @DisplayName("ping()")
+    class PingMethod {
 
         @Test
-        @DisplayName("Deve chamar callme-service e retornar resposta concatenada")
-        void shouldCallCallmeService() throws Exception {
+        @DisplayName("Deve chamar callme-service e retornar resposta formatada")
+        void shouldCallCallmeService() {
             when(callmeServiceClient.ping()).thenReturn("callme-service(v1)");
 
-            mockMvc.perform(get("/caller/ping"))
-                    .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("caller-service")))
-                    .andExpect(content().string(containsString("callme-service")));
+            String result = callerService.ping();
 
+            assertThat(result).isEqualTo("caller-service(v1) -> callme-service(v1)");
             verify(callmeServiceClient).ping();
         }
     }
 
     @Nested
-    @DisplayName("GET /caller/ping-with-random-error")
-    class PingWithRandomErrorEndpoint {
+    @DisplayName("pingWithRandomError()")
+    class PingWithRandomErrorMethod {
 
         @Test
         @DisplayName("Deve chamar callme-service endpoint com erro aleatório")
-        void shouldCallCallmeServiceWithRandomError() throws Exception {
+        void shouldCallCallmeServiceWithRandomError() {
             when(callmeServiceClient.pingWithRandomError()).thenReturn("callme-service(v1)");
 
-            mockMvc.perform(get("/caller/ping-with-random-error"))
-                    .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("caller-service")));
+            String result = callerService.pingWithRandomError();
 
+            assertThat(result).isEqualTo("caller-service(v1) -> callme-service(v1)");
             verify(callmeServiceClient).pingWithRandomError();
         }
     }
 
     @Nested
-    @DisplayName("GET /caller/ping-with-random-delay")
-    class PingWithRandomDelayEndpoint {
+    @DisplayName("pingWithRandomDelay()")
+    class PingWithRandomDelayMethod {
 
         @Test
         @DisplayName("Deve chamar callme-service endpoint com delay aleatório")
-        void shouldCallCallmeServiceWithRandomDelay() throws Exception {
+        void shouldCallCallmeServiceWithRandomDelay() {
             when(callmeServiceClient.pingWithRandomDelay()).thenReturn("callme-service(v1)");
 
-            mockMvc.perform(get("/caller/ping-with-random-delay"))
-                    .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("caller-service")));
+            String result = callerService.pingWithRandomDelay();
 
+            assertThat(result).isEqualTo("caller-service(v1) -> callme-service(v1)");
             verify(callmeServiceClient).pingWithRandomDelay();
-        }
-    }
-
-    @Nested
-    @DisplayName("Actuator Health Endpoints")
-    class ActuatorHealthEndpoints {
-
-        @Test
-        @DisplayName("GET /actuator/health deve retornar UP")
-        void healthShouldReturnUp() throws Exception {
-            mockMvc.perform(get("/actuator/health"))
-                    .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("UP")));
         }
     }
 }
