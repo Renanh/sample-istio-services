@@ -1,78 +1,83 @@
 package com.github.renanh.callme;
 
+import com.github.renanh.callme.domain.service.CallmeService;
+import com.github.renanh.callme.infrastructure.config.ServiceProperties;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.web.servlet.MockMvc;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@DisplayName("Callme Resource")
+@ExtendWith(MockitoExtension.class)
+@DisplayName("Callme Service")
 class CallmeResourceTests {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Mock
+    private ServiceProperties serviceProperties;
+
+    private CallmeService callmeService;
+
+    @BeforeEach
+    void setUp() {
+        when(serviceProperties.getVersion()).thenReturn("v1");
+        callmeService = new CallmeService(serviceProperties);
+    }
 
     @Nested
-    @DisplayName("GET /callme/ping")
-    class PingEndpoint {
+    @DisplayName("ping()")
+    class PingMethod {
 
         @Test
-        @DisplayName("Deve retornar 200 OK com nome do serviço")
-        void shouldReturnOkWithServiceName() throws Exception {
-            mockMvc.perform(get("/callme/ping"))
-                    .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("callme-service")));
+        @DisplayName("Deve retornar resposta formatada com versao do servico")
+        void shouldReturnFormattedResponse() {
+            String result = callmeService.ping();
+
+            assertThat(result).isEqualTo("callme-service(v1)");
         }
     }
 
     @Nested
-    @DisplayName("GET /callme/ping-with-random-delay")
-    class PingWithRandomDelayEndpoint {
+    @DisplayName("pingWithRandomDelay()")
+    class PingWithRandomDelayMethod {
 
         @Test
-        @DisplayName("Deve retornar 200 OK mesmo com delay")
-        void shouldReturnOkWithDelay() throws Exception {
-            mockMvc.perform(get("/callme/ping-with-random-delay"))
-                    .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("callme-service")));
+        @DisplayName("Deve retornar resposta apos delay aleatorio")
+        void shouldReturnResponseAfterDelay() {
+            String result = callmeService.pingWithRandomDelay();
+
+            assertThat(result).isEqualTo("callme-service(v1)");
         }
     }
 
     @Nested
-    @DisplayName("Actuator Health Endpoints")
-    class ActuatorHealthEndpoints {
+    @DisplayName("getVersion()")
+    class GetVersionMethod {
 
         @Test
-        @DisplayName("GET /actuator/health deve retornar UP")
-        void healthShouldReturnUp() throws Exception {
-            mockMvc.perform(get("/actuator/health"))
-                    .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("UP")));
+        @DisplayName("Deve retornar versao configurada")
+        void shouldReturnConfiguredVersion() {
+            String version = callmeService.getVersion();
+
+            assertThat(version).isEqualTo("v1");
         }
+    }
+
+    @Nested
+    @DisplayName("getInstanceId()")
+    class GetInstanceIdMethod {
 
         @Test
-        @DisplayName("GET /actuator/health/liveness deve retornar UP")
-        void livenessShouldReturnUp() throws Exception {
-            mockMvc.perform(get("/actuator/health/liveness"))
-                    .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("UP")));
-        }
+        @DisplayName("Deve retornar ID de instancia unico")
+        void shouldReturnUniqueInstanceId() {
+            String instanceId = callmeService.getInstanceId();
 
-        @Test
-        @DisplayName("GET /actuator/health/readiness deve retornar UP")
-        void readinessShouldReturnUp() throws Exception {
-            mockMvc.perform(get("/actuator/health/readiness"))
-                    .andExpect(status().isOk())
-                    .andExpect(content().string(containsString("UP")));
+            assertThat(instanceId).isNotNull();
+            assertThat(instanceId).hasSize(8);
         }
     }
 }
