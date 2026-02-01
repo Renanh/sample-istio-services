@@ -42,7 +42,7 @@
         <!-- https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui -->
         <springdoc-openapi.version>3.0.1</springdoc-openapi.version>
         <!-- https://mvnrepository.com/artifact/io.micrometer/micrometer-tracing-bridge-otel -->
-        <micrometer-tracing.version>1.5.8</micrometer-tracing.version>
+        <micrometer-tracing.version>1.6.2</micrometer-tracing.version>
 
         <!-- Lombok -->
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
