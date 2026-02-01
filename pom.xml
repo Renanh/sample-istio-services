@@ -43,8 +43,6 @@
         <springdoc-openapi.version>3.0.1</springdoc-openapi.version>
         <!-- https://mvnrepository.com/artifact/io.micrometer/micrometer-tracing-bridge-otel -->
         <micrometer-tracing.version>1.5.8</micrometer-tracing.version>
-        <!-- https://mvnrepository.com/artifact/io.specto/hoverfly-java-junit5 -->
-        <hoverfly.version>0.20.2</hoverfly.version>
 
         <!-- Lombok -->
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
@@ -77,11 +75,6 @@
                 <groupId>io.micrometer</groupId>
                 <artifactId>micrometer-tracing-bridge-otel</artifactId>
                 <version>${micrometer-tracing.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.specto</groupId>
-                <artifactId>hoverfly-java-junit5</artifactId>
-                <version>${hoverfly.version}</version>
             </dependency>
             <!-- Lombok -->
             <dependency>

@@ -1,98 +1,95 @@
 package com.github.renanh.caller;
 
-import io.specto.hoverfly.junit.core.Hoverfly;
-import io.specto.hoverfly.junit5.HoverflyExtension;
-import io.specto.hoverfly.junit5.api.HoverflyConfig;
-import io.specto.hoverfly.junit5.api.HoverflyCore;
-import org.junit.jupiter.api.BeforeEach;
+import com.github.renanh.caller.infrastructure.client.CallmeServiceClient;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.web.client.RestClient;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
 
-import static io.specto.hoverfly.junit.core.SimulationSource.dsl;
-import static io.specto.hoverfly.junit.dsl.HoverflyDsl.service;
-import static io.specto.hoverfly.junit.dsl.ResponseCreators.success;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ExtendWith(HoverflyExtension.class)
-@HoverflyCore(config = @HoverflyConfig(proxyLocalHost = true))
-@TestPropertySource(properties = {
-        "services.callme.url=http://callme-service:8080"
-})
+@SpringBootTest
+@AutoConfigureMockMvc
 @DisplayName("Caller Service - Integração com Callme Service")
 class CallerCallmeTest {
 
-    @LocalServerPort
-    private int port;
+    @Autowired
+    private MockMvc mockMvc;
 
-    private RestClient restClient;
+    @MockitoBean
+    private CallmeServiceClient callmeServiceClient;
 
-    @BeforeEach
-    void setUp() {
-        restClient = RestClient.builder()
-                .baseUrl("http://localhost:" + port)
-                .build();
+    @Nested
+    @DisplayName("GET /caller/ping")
+    class PingEndpoint {
+
+        @Test
+        @DisplayName("Deve chamar callme-service e retornar resposta concatenada")
+        void shouldCallCallmeService() throws Exception {
+            when(callmeServiceClient.ping()).thenReturn("callme-service(v1)");
+
+            mockMvc.perform(get("/caller/ping"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("caller-service")))
+                    .andExpect(content().string(containsString("callme-service")));
+
+            verify(callmeServiceClient).ping();
+        }
     }
 
-    @Test
-    @DisplayName("Deve chamar callme-service e retornar resposta concatenada")
-    void shouldCallCallmeService(Hoverfly hoverfly) {
-        hoverfly.simulate(dsl(
-                service("callme-service:8080")
-                        .get("/callme/ping")
-                        .willReturn(success("callme-service(v1)", "text/plain"))
-        ));
+    @Nested
+    @DisplayName("GET /caller/ping-with-random-error")
+    class PingWithRandomErrorEndpoint {
 
-        ResponseEntity<String> response = restClient.get()
-                .uri("/caller/ping")
-                .retrieve()
-                .toEntity(String.class);
+        @Test
+        @DisplayName("Deve chamar callme-service endpoint com erro aleatório")
+        void shouldCallCallmeServiceWithRandomError() throws Exception {
+            when(callmeServiceClient.pingWithRandomError()).thenReturn("callme-service(v1)");
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(200));
-        assertThat(response.getBody()).contains("caller-service");
-        assertThat(response.getBody()).contains("callme-service");
+            mockMvc.perform(get("/caller/ping-with-random-error"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("caller-service")));
+
+            verify(callmeServiceClient).pingWithRandomError();
+        }
     }
 
-    @Test
-    @DisplayName("Deve chamar callme-service endpoint com erro aleatório")
-    void shouldCallCallmeServiceWithRandomError(Hoverfly hoverfly) {
-        hoverfly.simulate(dsl(
-                service("callme-service:8080")
-                        .get("/callme/ping-with-random-error")
-                        .willReturn(success("callme-service(v1)", "text/plain"))
-        ));
+    @Nested
+    @DisplayName("GET /caller/ping-with-random-delay")
+    class PingWithRandomDelayEndpoint {
 
-        ResponseEntity<String> response = restClient.get()
-                .uri("/caller/ping-with-random-error")
-                .retrieve()
-                .toEntity(String.class);
+        @Test
+        @DisplayName("Deve chamar callme-service endpoint com delay aleatório")
+        void shouldCallCallmeServiceWithRandomDelay() throws Exception {
+            when(callmeServiceClient.pingWithRandomDelay()).thenReturn("callme-service(v1)");
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(200));
-        assertThat(response.getBody()).contains("caller-service");
+            mockMvc.perform(get("/caller/ping-with-random-delay"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("caller-service")));
+
+            verify(callmeServiceClient).pingWithRandomDelay();
+        }
     }
 
-    @Test
-    @DisplayName("Deve chamar callme-service endpoint com delay aleatório")
-    void shouldCallCallmeServiceWithRandomDelay(Hoverfly hoverfly) {
-        hoverfly.simulate(dsl(
-                service("callme-service:8080")
-                        .get("/callme/ping-with-random-delay")
-                        .willReturn(success("callme-service(v1)", "text/plain"))
-        ));
+    @Nested
+    @DisplayName("Actuator Health Endpoints")
+    class ActuatorHealthEndpoints {
 
-        ResponseEntity<String> response = restClient.get()
-                .uri("/caller/ping-with-random-delay")
-                .retrieve()
-                .toEntity(String.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(200));
-        assertThat(response.getBody()).contains("caller-service");
+        @Test
+        @DisplayName("GET /actuator/health deve retornar UP")
+        void healthShouldReturnUp() throws Exception {
+            mockMvc.perform(get("/actuator/health"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("UP")));
+        }
     }
 }
