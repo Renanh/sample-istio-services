@@ -1,0 +1,13 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: c1
+networking:
+  podSubnet: "10.10.0.0/16"
+  serviceSubnet: "10.255.10.0/24"
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 30000
+        hostPort: 30000
+        protocol: TCP
+  - role: worker

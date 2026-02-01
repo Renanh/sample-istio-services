@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: callme-service
+  labels:
+    app: callme-service
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
+    - port: 9091
+      targetPort: 9091
+      protocol: TCP
+      name: jmx
+  selector:
+    app: callme-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: callme-service
+  labels:
+    app: callme-service
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: callme-service
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: callme-service
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+        - name: callme-service
+          image: renanh/callme-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 9091
+              name: jmx
+          env:
+            - name: VERSION
+              value: "v1"
+            - name: BPL_JFR_ENABLED
+              value: "true"
+            - name: JAVA_TOOL_OPTIONS
+              value: >-
+                -XX:StartFlightRecording=name=continuous,settings=default,maxage=1h
+                -Dcom.sun.management.jmxremote
+                -Dcom.sun.management.jmxremote.port=9091
+                -Dcom.sun.management.jmxremote.rmi.port=9091
+                -Dcom.sun.management.jmxremote.authenticate=false
+                -Dcom.sun.management.jmxremote.ssl=false
+                -Djava.rmi.server.hostname=0.0.0.0
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "200m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            failureThreshold: 3

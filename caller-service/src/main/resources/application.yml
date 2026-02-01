@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: caller-service
+
+server:
+  port: 8080
+
+services:
+  callme:
+    url: ${CALLME_SERVICE_URL:http://callme-service:8080}
+    timeout: ${CALLME_SERVICE_TIMEOUT:5000}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    com.github.renanh: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

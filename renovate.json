@@ -1,0 +1,29 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base",
+    ":semanticCommits",
+    ":preserveSemverRanges"
+  ],
+  "dependencyDashboard": true,
+  "automerge": true,
+  "automergeType": "pr",
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": true
+    },
+    {
+      "matchPackagePatterns": ["spring-boot"],
+      "groupName": "Spring Boot",
+      "automerge": false
+    },
+    {
+      "matchPackagePatterns": ["junit", "mockito", "assertj"],
+      "groupName": "Testing libraries"
+    }
+  ],
+  "schedule": [
+    "before 6am on monday"
+  ]
+}

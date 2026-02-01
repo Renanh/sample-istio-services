@@ -1,0 +1,73 @@
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: first-service-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "first.example.com"
+        - "first-service.local"
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: first-service
+spec:
+  host: first-service
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        h2UpgradePolicy: UPGRADE
+        http1MaxPendingRequests: 100
+        http2MaxRequests: 1000
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 30s
+      baseEjectionTime: 60s
+      maxEjectionPercent: 100
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+    - name: v2
+      labels:
+        version: v2
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: first-service
+spec:
+  hosts:
+    - "first.example.com"
+    - "first-service.local"
+    - first-service
+  gateways:
+    - first-service-gateway
+    - mesh
+  http:
+    - match:
+        - uri:
+            prefix: /first
+      route:
+        - destination:
+            host: first-service
+            subset: v1
+          weight: 80
+        - destination:
+            host: first-service
+            subset: v2
+          weight: 20
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: gateway-error,connect-failure,refused-stream
+      timeout: 10s

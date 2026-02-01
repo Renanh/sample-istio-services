@@ -1,0 +1,23 @@
+apiVersion: skaffold/v4beta11
+kind: Config
+metadata:
+  name: callme-service
+
+build:
+  artifacts:
+    - image: renanh/callme-service
+      jib:
+        project: com.github.renanh:callme-service
+
+manifests:
+  rawYaml:
+    - k8s/deployment.yaml
+
+deploy:
+  kubectl: {}
+
+portForward:
+  - resourceType: service
+    resourceName: callme-service
+    port: 8080
+    localPort: 8082

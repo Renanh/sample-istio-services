@@ -1,0 +1,23 @@
+apiVersion: skaffold/v4beta11
+kind: Config
+metadata:
+  name: caller-service
+
+build:
+  artifacts:
+    - image: renanh/caller-service
+      jib:
+        project: com.github.renanh:caller-service
+
+manifests:
+  rawYaml:
+    - k8s/deployment.yaml
+
+deploy:
+  kubectl: {}
+
+portForward:
+  - resourceType: service
+    resourceName: caller-service
+    port: 8080
+    localPort: 8081

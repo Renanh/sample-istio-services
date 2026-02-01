@@ -1,0 +1,23 @@
+apiVersion: skaffold/v4beta11
+kind: Config
+metadata:
+  name: first-service
+
+build:
+  artifacts:
+    - image: renanh/first-service
+      jib:
+        project: com.github.renanh:first-service
+
+manifests:
+  rawYaml:
+    - k8s/deployment.yaml
+
+deploy:
+  kubectl: {}
+
+portForward:
+  - resourceType: service
+    resourceName: first-service
+    port: 8080
+    localPort: 8080

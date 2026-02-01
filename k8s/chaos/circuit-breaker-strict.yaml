@@ -1,0 +1,40 @@
+# Chaos Engineering: Strict Circuit Breaker
+# Configuração mais restritiva de circuit breaker para testes
+# Ejeta pods após apenas 2 erros consecutivos
+#
+# Uso:
+#   kubectl apply -f k8s/chaos/circuit-breaker-strict.yaml -n istio-test
+#
+# Remover:
+#   kubectl delete -f k8s/chaos/circuit-breaker-strict.yaml -n istio-test
+#   kubectl apply -f callme-service/k8s/istio-rules.yaml -n istio-test
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: callme-service-strict
+spec:
+  host: callme-service
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 10
+      http:
+        h2UpgradePolicy: UPGRADE
+        http1MaxPendingRequests: 10
+        http2MaxRequests: 100
+        maxRequestsPerConnection: 5
+    # Circuit breaker agressivo
+    outlierDetection:
+      consecutive5xxErrors: 2       # Ejeta após 2 erros (mais restritivo)
+      interval: 5s                   # Analisa a cada 5 segundos
+      baseEjectionTime: 30s          # Tempo de ejeção base
+      maxEjectionPercent: 100        # Pode ejetar todos os pods
+      minHealthPercent: 0            # Continua mesmo com 0% saudável
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+    - name: v2
+      labels:
+        version: v2

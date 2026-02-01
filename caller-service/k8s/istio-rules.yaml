@@ -1,0 +1,65 @@
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: caller-service-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "caller.example.com"
+        - "caller-service.local"
+---
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: caller-service
+spec:
+  host: caller-service
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        h2UpgradePolicy: UPGRADE
+        http1MaxPendingRequests: 100
+        http2MaxRequests: 1000
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 30s
+      baseEjectionTime: 60s
+      maxEjectionPercent: 100
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: caller-service
+spec:
+  hosts:
+    - "caller.example.com"
+    - "caller-service.local"
+    - caller-service
+  gateways:
+    - caller-service-gateway
+    - mesh
+  http:
+    - match:
+        - uri:
+            prefix: /caller
+      route:
+        - destination:
+            host: caller-service
+            subset: v1
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: gateway-error,connect-failure,refused-stream
+      timeout: 10s

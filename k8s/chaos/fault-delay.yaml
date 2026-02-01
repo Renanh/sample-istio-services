@@ -1,0 +1,37 @@
+# Chaos Engineering: Latency Injection
+# Injeta delay de 5 segundos em 50% das requisições para callme-service
+#
+# Uso:
+#   kubectl apply -f k8s/chaos/fault-delay.yaml -n istio-test
+#
+# Remover:
+#   kubectl delete -f k8s/chaos/fault-delay.yaml -n istio-test
+#   kubectl apply -f callme-service/k8s/istio-rules.yaml -n istio-test
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: callme-service-chaos-delay
+spec:
+  hosts:
+    - callme-service
+  http:
+    - fault:
+        delay:
+          percentage:
+            value: 50
+          fixedDelay: 5s
+      route:
+        - destination:
+            host: callme-service
+            subset: v2
+          weight: 80
+        - destination:
+            host: callme-service
+            subset: v1
+          weight: 20
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: gateway-error,connect-failure,refused-stream
+      timeout: 10s

@@ -1,0 +1,32 @@
+# Chaos Engineering: Cascade Failure Simulation
+# Simula falha total do serviço backend (100% erro 503)
+# Útil para testar como o sistema degrada graciosamente
+#
+# Uso:
+#   kubectl apply -f k8s/chaos/fault-cascade.yaml -n istio-test
+#
+# Remover:
+#   kubectl delete -f k8s/chaos/fault-cascade.yaml -n istio-test
+#   kubectl apply -f callme-service/k8s/istio-rules.yaml -n istio-test
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: callme-service-chaos-cascade
+spec:
+  hosts:
+    - callme-service
+  http:
+    - fault:
+        abort:
+          percentage:
+            value: 100
+          httpStatus: 503
+      route:
+        - destination:
+            host: callme-service
+      retries:
+        attempts: 5
+        perTryTimeout: 1s
+        retryOn: gateway-error,connect-failure,refused-stream,5xx
+      timeout: 10s

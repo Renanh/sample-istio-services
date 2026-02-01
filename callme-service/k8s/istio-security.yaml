@@ -1,0 +1,31 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: callme-service-policy
+spec:
+  selector:
+    matchLabels:
+      app: callme-service
+      version: v2
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/default/sa/caller-service"
+              - "cluster.local/ns/default/sa/default"
+      to:
+        - operation:
+            methods: ["GET"]
+            paths: ["/callme/*"]
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: callme-service-mtls
+spec:
+  selector:
+    matchLabels:
+      app: callme-service
+  mtls:
+    mode: STRICT

@@ -1,0 +1,85 @@
+apiVersion: skaffold/v4beta11
+kind: Config
+metadata:
+  name: sample-istio-services
+
+build:
+  artifacts:
+    - image: renanh/first-service
+      context: first-service
+      jib:
+        project: com.github.renanh:first-service
+    - image: renanh/caller-service
+      context: caller-service
+      jib:
+        project: com.github.renanh:caller-service
+    - image: renanh/callme-service
+      context: callme-service
+      jib:
+        project: com.github.renanh:callme-service
+  tagPolicy:
+    gitCommit:
+      ignoreChanges: true
+
+manifests:
+  rawYaml:
+    - first-service/k8s/deployment.yaml
+    - caller-service/k8s/deployment.yaml
+    - callme-service/k8s/deployment.yaml
+
+deploy:
+  kubectl: {}
+
+profiles:
+  - name: istio
+    manifests:
+      rawYaml:
+        - first-service/k8s/deployment-versions.yaml
+        - first-service/k8s/istio-rules.yaml
+        - caller-service/k8s/deployment-versions.yaml
+        - caller-service/k8s/istio-rules.yaml
+        - callme-service/k8s/deployment-versions.yaml
+        - callme-service/k8s/istio-rules.yaml
+
+  - name: istio-secure
+    manifests:
+      rawYaml:
+        - first-service/k8s/deployment-versions.yaml
+        - first-service/k8s/istio-rules.yaml
+        - caller-service/k8s/deployment-versions.yaml
+        - caller-service/k8s/istio-rules.yaml
+        - callme-service/k8s/deployment-versions.yaml
+        - callme-service/k8s/istio-rules.yaml
+        - callme-service/k8s/istio-security.yaml
+
+  - name: jfr
+    manifests:
+      rawYaml:
+        - first-service/k8s/deployment.yaml
+        - caller-service/k8s/deployment.yaml
+        - callme-service/k8s/deployment-jfr.yaml
+
+  - name: local
+    build:
+      local:
+        push: false
+        useBuildkit: true
+      artifacts:
+        - image: renanh/first-service
+          context: first-service
+          jib:
+            project: com.github.renanh:first-service
+        - image: renanh/caller-service
+          context: caller-service
+          jib:
+            project: com.github.renanh:caller-service
+        - image: renanh/callme-service
+          context: callme-service
+          jib:
+            project: com.github.renanh:callme-service
+
+portForward:
+  - resourceType: service
+    resourceName: first-service
+    port: 8080
+    localPort: 8080
