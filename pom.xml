@@ -60,7 +60,7 @@
         <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-enforcer-plugin -->
         <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
         <!-- https://mvnrepository.com/artifact/org.codehaus.mojo/versions-maven-plugin -->
-        <versions-maven-plugin.version>2.18.0</versions-maven-plugin.version>
+        <versions-maven-plugin.version>2.21.0</versions-maven-plugin.version>
 
         <!-- Docker/Jib properties -->
         <docker.image.prefix>renanh</docker.image.prefix>
