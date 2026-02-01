@@ -10,7 +10,7 @@ on:
 env:
   JAVA_VERSION: '21'
   REGISTRY: docker.io
-  IMAGE_PREFIX: renanh
+  IMAGE_PREFIX: renanhlima
 
 jobs:
   test:
