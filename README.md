@@ -5,7 +5,7 @@
 [![CI](https://github.com/Renanh/sample-istio-services/actions/workflows/ci.yml/badge.svg)](https://github.com/Renanh/sample-istio-services/actions/workflows/ci.yml)
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.org/projects/jdk/21/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.2-green.svg)](https://spring.io/projects/spring-boot)
-[![Istio](https://img.shields.io/badge/Istio-1.20+-blue.svg)](https://istio.io/)
+[![Istio](https://img.shields.io/badge/Istio-1.28-blue.svg)](https://istio.io/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Este projeto demonstra como implementar padrões de resiliência em microservices utilizando **Istio Service Mesh**, incluindo **Circuit Breaker**, **Retries**, **Timeouts** e **Fault Injection** - tudo configurado na camada de infraestrutura, sem alterações no código da aplicação.
@@ -409,7 +409,7 @@ spec:
 ### Kiali - Service Mesh Dashboard
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.20/samples/addons/kiali.yaml
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.28/samples/addons/kiali.yaml
 istioctl dashboard kiali
 ```
 
@@ -422,7 +422,7 @@ Kiali oferece:
 ### Grafana - Métricas
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.20/samples/addons/grafana.yaml
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.28/samples/addons/grafana.yaml
 istioctl dashboard grafana
 ```
 
@@ -434,14 +434,14 @@ Dashboards incluídos:
 ### Jaeger - Distributed Tracing
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.20/samples/addons/jaeger.yaml
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.28/samples/addons/jaeger.yaml
 istioctl dashboard jaeger
 ```
 
 ### Prometheus - Métricas
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.20/samples/addons/prometheus.yaml
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.28/samples/addons/prometheus.yaml
 ```
 
 Métricas importantes:
