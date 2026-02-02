@@ -46,7 +46,7 @@
 
         <!-- Lombok -->
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
-        <lombok.version>1.18.34</lombok.version>
+        <lombok.version>1.18.42</lombok.version>
 
         <!-- Apache Commons -->
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
